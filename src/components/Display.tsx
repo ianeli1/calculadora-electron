@@ -1,6 +1,6 @@
 import React from "react";
 
-interface DisplayProps {
+export interface DisplayProps {
   operation?: "+" | "-" | "*" | "/";
   result?: number;
   operand1?: number;
