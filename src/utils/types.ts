@@ -17,3 +17,8 @@ export interface SerialReceiveArgs {
   error: boolean;
 }
 
+export interface MyIpcRenderer {
+  on: (channel: string, callback: (...arg0: any) => void) => () => void;
+  send: (channel: string, data: any) => void;
+  invoke: (channel: string, data?: any) => Promise<any>;
+}

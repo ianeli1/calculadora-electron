@@ -1,4 +1,4 @@
-import { Operation } from "./types";
+import { MyIpcRenderer, Operation } from "./types";
 
 export function operationToNumber(operation: Operation): number {
   switch (operation) {
@@ -15,3 +15,12 @@ export function operationToNumber(operation: Operation): number {
   }
 }
 
+export function getIpcRenderer(): MyIpcRenderer {
+  try {
+    //@ts-expect-error
+    const ipcRenderer = window.ipcRenderer as MyIpcRenderer;
+    return ipcRenderer;
+  } catch (e) {
+    throw new Error(`ipcRenderer not found: ${e}`);
+  }
+}

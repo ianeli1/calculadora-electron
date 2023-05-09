@@ -3,8 +3,8 @@ import { Display, DisplayProps } from "./Display";
 import { Keyboard } from "./Keyboard";
 import { Keys } from "./Keyboard";
 import { SerialSendArgs } from "../utils/types";
-import { ipcRenderer } from "electron";
 import { useMessages } from "./messageContext";
+import { MyIpcRenderer } from "../utils/types";
 
 enum CalculatorStep {
   Op1,
@@ -12,7 +12,9 @@ enum CalculatorStep {
 }
 
 const sendMessage = (obj: SerialSendArgs) => {
-  ipcRenderer.emit("serial_send", obj);
+  //@ts-expect-error
+  const ipcRenderer = window.ipcRenderer as MyIpcRenderer;
+  ipcRenderer.send("serial_send", obj);
 };
 
 export const Calculator = () => {

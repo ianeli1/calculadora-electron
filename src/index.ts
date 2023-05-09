@@ -24,6 +24,7 @@ const createWindow = (): void => {
     width: 800,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      contextIsolation: true,
     },
     autoHideMenuBar: true,
     frame: false,
@@ -98,6 +99,10 @@ function openPort() {
       error: (byte1 & 0b00000001) === 1,
     };
 
+    console.log(
+      `Received ${buffer}, byteLength: ${buffer.byteLength} from port ${chosenPort}`
+    );
+
     ipcMain.emit("serial_receive", obj);
   });
 }
@@ -113,12 +118,21 @@ ipcMain.on("serial_send", (_, obj: SerialSendArgs) => {
     obj.op2,
   ]);
 
+  console.log(`Sending ${buffer} to port ${chosenPort}`);
+
   port.write(buffer);
 });
 
 ipcMain.on("serial_port_select", (_, obj: SerialPortSelectArgs) => {
+  chosenPort = obj.port;
+  console.log(`Updated chosen port to ${chosenPort}`);
   if (!port || port.closed) {
     openPort();
   }
-  chosenPort = obj.port;
+});
+
+ipcMain.handle("serial_port_list", async () => {
+  const ports = await SerialPort.list();
+  console.log(`Fetching serial port list: ${JSON.stringify(ports)}`);
+  return ports.map((port) => port.path);
 });

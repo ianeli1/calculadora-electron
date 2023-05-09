@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { SerialPort } from "serialport";
+import { getIpcRenderer } from "../utils/utils";
+import { SerialPortSelectArgs } from "../utils/types";
+//import { SerialPort } from "serialport";
 
 async function getPorts() {
+  //return ["none"];
   try {
-    const portList = await SerialPort.list();
-    return portList.map(({ path }) => path);
+    return (await getIpcRenderer().invoke("serial_port_list")) as string[];
   } catch (e) {
-    throw new Error(`An error ocurred trying to fetch ports available`);
+    throw new Error(`An error ocurred trying to fetch ports available: ${e}`);
   }
 }
 
@@ -18,6 +20,10 @@ export const PortSelector = () => {
     if (e.target.checked) {
       const port = e.target.id;
       setSelectedPort(port);
+      const args: SerialPortSelectArgs = {
+        port,
+      };
+      getIpcRenderer().send("serial_port_select", args);
     }
   }, []);
 
@@ -47,7 +53,7 @@ export const PortSelector = () => {
           {ports.map((port) => (
             <div className="form-control" key={port}>
               <label className="label cursor-pointer">
-                <span className="label-text">Red pill</span>
+                <span className="label-text">{port ?? "[NONE]"}</span>
                 <input
                   id={port}
                   type="radio"
@@ -64,4 +70,3 @@ export const PortSelector = () => {
     </div>
   );
 };
-

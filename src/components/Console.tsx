@@ -1,8 +1,7 @@
 import { SpinnerIosRegular } from "@fluentui/react-icons";
 import React, { useEffect, useState } from "react";
 import { Message } from "./Message";
-import { ipcRenderer } from "electron";
-import { SerialReceiveArgs } from "../utils/types";
+import type { MyIpcRenderer, SerialReceiveArgs } from "../utils/types";
 import { MessageElement } from "./messageContext";
 
 const origTimestamp = new Date();
@@ -24,15 +23,11 @@ const exampleMessages: MessageElement[] = [
   },
 ];
 
-interface ConsoleProps {
-  on;
-}
-
 export const Console = () => {
   //Creates a ipcRenderer channel listener for "serial_receive" and stores the data in MessageElement state array
   const [messages, setMessages] = useState<MessageElement[]>(exampleMessages);
   useEffect(() => {
-    const callback = (_: any, obj: SerialReceiveArgs) => {
+    const callback = (obj: SerialReceiveArgs) => {
       const { result, error } = obj;
       setMessages((messages) => [
         ...messages,
@@ -44,9 +39,11 @@ export const Console = () => {
         },
       ]);
     };
-    ipcRenderer.on("serial_receive", callback);
 
-    return () => void ipcRenderer.removeListener("serial_receive", callback);
+    //@ts-expect-error
+    const ipcRenderer = window.ipcRenderer as MyIpcRenderer;
+
+    return ipcRenderer.on("serial_receive", callback);
   }, []);
 
   return (
