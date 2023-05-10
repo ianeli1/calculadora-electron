@@ -36,9 +36,9 @@ export const PortSelector = () => {
   }, []);
 
   return (
-    <div className="card w-96 bg-primary text-primary-content">
-      <div className="card-body">
-        <button className="btn btn-square" onClick={reloadPorts}>
+    <div className="card w-96 bg-base-300 text-primary-content h-full p-2">
+      <div className="card-body flex flex-col overflow-hidden">
+        <button className="btn btn-square text-white" onClick={reloadPorts}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -49,7 +49,7 @@ export const PortSelector = () => {
             <path d="M2.05 11H7v-1.5L2.05 12.5 7 14.5V13h5v-2H7V9.5l-4.95 1.5zM21.95 11H17v1.5l4.95-1.5-4.95-1.5V10h-5v2h5v1.5l4.95-1.5z" />
           </svg>
         </button>
-        <div>
+        <div className="overflow-y-auto">
           {ports.map((port) => (
             <div className="form-control" key={port}>
               <label className="label cursor-pointer">

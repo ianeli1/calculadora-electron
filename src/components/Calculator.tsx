@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Display, DisplayProps } from "./Display";
 import { Keyboard } from "./Keyboard";
 import { Keys } from "./Keyboard";
@@ -26,6 +26,28 @@ export const Calculator = () => {
 
   const [step, setStep] = React.useState<CalculatorStep>(CalculatorStep.Op1);
 
+  useEffect(() => {
+    if (displayContents.operand1 > 255) {
+      setDisplayContents((obj) => ({
+        ...obj,
+        operand1: 0,
+      }));
+    } else if (displayContents.operand2 > 255) {
+      setDisplayContents((obj) => ({
+        ...obj,
+        operand2: 0,
+      }));
+    } else if (
+      (displayContents.operand2 > displayContents.operand1 &&
+        displayContents.operation === "-") ||
+      (displayContents.operand2 === 0 && displayContents.operation == "/")
+    ) {
+      setDisplayContents({});
+    } else if (Object.keys(displayContents).length === 0) {
+      setStep(CalculatorStep.Op1);
+    }
+  }, [displayContents]);
+
   const onInput = React.useCallback(
     (input: Keys) => {
       switch (step) {
@@ -33,7 +55,7 @@ export const Calculator = () => {
           if (typeof input === "number") {
             setDisplayContents((obj) => ({
               ...obj,
-              operand1: +(obj.operand1.toString() + input),
+              operand1: +((obj.operand1 ?? 0).toString() + input),
             }));
           } else if (typeof input === "string" && input != "=") {
             setDisplayContents((obj) => ({
@@ -47,21 +69,31 @@ export const Calculator = () => {
           if (typeof input === "number") {
             setDisplayContents((obj) => ({
               ...obj,
-              operand2: +(obj.operand2.toString() + input),
+              operand2: +((obj.operand2 ?? 0).toString() + input),
             }));
           } else if (input === "=") {
             //mandar serial y esperar respuesta
-            sendMessage({
-              op1: displayContents.operand1,
-              op2: displayContents.operand2,
-              operation: displayContents.operation,
-            });
-            addMessage({
-              sending: true,
-              message: `${displayContents.operand1} ${displayContents.operation} ${displayContents.operand2}`,
-              error: false,
-              timestamp: new Date(),
-            });
+            if (
+              "operand1" in displayContents &&
+              "operand2" in displayContents &&
+              "operation" in displayContents
+            ) {
+              sendMessage({
+                op1: displayContents.operand1,
+                op2: displayContents.operand2,
+                operation: displayContents.operation,
+              });
+              addMessage({
+                sending: true,
+                message: `${displayContents.operand1} ${displayContents.operation} ${displayContents.operand2}`,
+                error: false,
+                timestamp: new Date(),
+              });
+            } else {
+              console.log(
+                `Missing parameters in ${JSON.stringify(displayContents)}`
+              );
+            }
           } else if (typeof input === "string") {
             setDisplayContents((obj) => ({
               ...obj,
@@ -71,7 +103,7 @@ export const Calculator = () => {
           break;
       }
     },
-    [step]
+    [step, displayContents]
   );
 
   const onDelete = React.useCallback(

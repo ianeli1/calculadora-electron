@@ -17,6 +17,8 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+let win: BrowserWindow | null = null;
+
 const createWindow = (): void => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -38,6 +40,7 @@ const createWindow = (): void => {
   mainWindow.webContents.openDevTools({
     mode: "detach",
   });
+  win = mainWindow;
 };
 
 // This method will be called when Electron has finished
@@ -83,11 +86,26 @@ function openPort() {
       stopBits: 1,
     },
     (error) => {
-      throw new Error(
-        `An error ocurred while opening port ${chosenPort}: ${error}`
-      );
+      if (error) {
+        console.log(error);
+        throw new Error(
+          `An error ocurred while opening port ${chosenPort}: ${error}`
+        );
+      }
     }
   );
+
+  port.on("open", () => {
+    console.log(`Port ${chosenPort} is open`);
+  });
+
+  port.on("error", (err) => {
+    console.log(`An error ocurred in port ${chosenPort}`, err);
+  });
+
+  port.on("close", () => {
+    console.log("Port is closed");
+  });
 
   port.on("data", (chunk) => {
     const buffer = Buffer.from(chunk, "binary");
@@ -103,7 +121,12 @@ function openPort() {
       `Received ${buffer}, byteLength: ${buffer.byteLength} from port ${chosenPort}`
     );
 
-    ipcMain.emit("serial_receive", obj);
+    console.log(
+      `Result => ${obj.result}, is error: ${obj.error ? "yes" : "no"}`
+    );
+
+    win?.webContents.send("serial_receive", obj);
+    // ipcMain.emit("serial_receive", obj);
   });
 }
 
@@ -112,13 +135,13 @@ ipcMain.on("serial_send", (_, obj: SerialSendArgs) => {
     openPort();
   }
 
-  const buffer = Buffer.from([
-    operationToNumber(obj.operation),
-    obj.op1,
-    obj.op2,
-  ]);
+  const data = [operationToNumber(obj.operation), obj.op1, obj.op2];
 
-  console.log(`Sending ${buffer} to port ${chosenPort}`);
+  const buffer = Buffer.from(data);
+
+  console.log(
+    `Sending ${data}, byteLength: ${buffer.byteLength} to port ${chosenPort}`
+  );
 
   port.write(buffer);
 });

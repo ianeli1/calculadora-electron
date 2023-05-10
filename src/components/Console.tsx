@@ -2,7 +2,8 @@ import { SpinnerIosRegular } from "@fluentui/react-icons";
 import React, { useEffect, useState } from "react";
 import { Message } from "./Message";
 import type { MyIpcRenderer, SerialReceiveArgs } from "../utils/types";
-import { MessageElement } from "./messageContext";
+import { MessageElement, useMessages } from "./messageContext";
+import { getIpcRenderer } from "../utils/utils";
 
 const origTimestamp = new Date();
 
@@ -25,29 +26,30 @@ const exampleMessages: MessageElement[] = [
 
 export const Console = () => {
   //Creates a ipcRenderer channel listener for "serial_receive" and stores the data in MessageElement state array
-  const [messages, setMessages] = useState<MessageElement[]>(exampleMessages);
+
+  const { addMessage, messages } = useMessages();
+
   useEffect(() => {
     const callback = (obj: SerialReceiveArgs) => {
+      console.log(
+        `Message received in UI, result: ${obj.result}, error: ${
+          obj.error ? "error" : "ok"
+        }`
+      );
       const { result, error } = obj;
-      setMessages((messages) => [
-        ...messages,
-        {
-          sending: false,
-          message: `Data received: ${result}`,
-          timestamp: new Date(),
-          error,
-        },
-      ]);
+      addMessage({
+        sending: false,
+        message: `Data received: ${result}`,
+        timestamp: new Date(),
+        error,
+      });
     };
 
-    //@ts-expect-error
-    const ipcRenderer = window.ipcRenderer as MyIpcRenderer;
-
-    return ipcRenderer.on("serial_receive", callback);
+    return getIpcRenderer().on("serial_receive", callback);
   }, []);
 
   return (
-    <section className="bg-base-300 rounded-3xl flex flex-col m-auto w-10/12 h-full overflow-hidden justify-end">
+    <section className="bg-base-300 rounded-3xl flex flex-col h-full overflow-hidden justify-end">
       <div className="overflow-y-auto">
         {/* message history */}
         {messages.map((message, index) => (

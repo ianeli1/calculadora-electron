@@ -11,7 +11,7 @@ function Home() {
       <Window>
         <div className="grid grid-cols-2 items-center justify-center gap-4 p-4 overflow-hidden">
           <Calculator />
-          <div className="grid grid-rows-2 h-full">
+          <div className="grid grid-rows-2 h-screen gap-2 py-2">
             <PortSelector />
             <Console />
           </div>
