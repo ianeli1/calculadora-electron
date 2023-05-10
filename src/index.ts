@@ -108,24 +108,33 @@ function openPort() {
   });
 
   port.on("data", (chunk) => {
-    const buffer = Buffer.from(chunk, "binary");
-    const byte0 = buffer.readUint8(0);
-    const byte1 = buffer.readUint8(1);
+    try {
+      const buffer = Buffer.from(chunk, "binary");
+      const byte0 = buffer.readUint8(0);
+      const byte1 = buffer.readUint8(1);
 
-    const obj: SerialReceiveArgs = {
-      result: byte0,
-      error: (byte1 & 0b00000001) === 1,
-    };
+      const obj: SerialReceiveArgs = {
+        result: byte1,
+        error: (byte0 & 0b00000001) === 1,
+      };
 
-    console.log(
-      `Received ${buffer}, byteLength: ${buffer.byteLength} from port ${chosenPort}`
-    );
+      console.log(
+        `Received ${buffer}, byteLength: ${buffer.byteLength} from port ${chosenPort}`
+      );
 
-    console.log(
-      `Result => ${obj.result}, is error: ${obj.error ? "yes" : "no"}`
-    );
+      console.log(
+        `Result => ${obj.result}, is error: ${obj.error ? "yes" : "no"}`
+      );
 
-    win?.webContents.send("serial_receive", obj);
+      win?.webContents.send("serial_receive", obj);
+    } catch (e) {
+      console.log(`Error receiving data:`, e);
+      const obj: SerialReceiveArgs = {
+        result: 999,
+        error: true,
+      };
+      win?.webContents.send("serial_receive", obj);
+    }
     // ipcMain.emit("serial_receive", obj);
   });
 }

@@ -22,7 +22,7 @@ export const Calculator = () => {
     {}
   );
 
-  const { addMessage } = useMessages();
+  const { addMessage, setResult } = useMessages();
 
   const [step, setStep] = React.useState<CalculatorStep>(CalculatorStep.Op1);
 
@@ -111,6 +111,7 @@ export const Calculator = () => {
       if (fullDelete) {
         setDisplayContents({});
         setStep(CalculatorStep.Op1);
+        setResult(null);
         return;
       }
       switch (step) {

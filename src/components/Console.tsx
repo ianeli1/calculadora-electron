@@ -27,7 +27,7 @@ const exampleMessages: MessageElement[] = [
 export const Console = () => {
   //Creates a ipcRenderer channel listener for "serial_receive" and stores the data in MessageElement state array
 
-  const { addMessage, messages } = useMessages();
+  const { addMessage, messages, setResult, setError } = useMessages();
 
   useEffect(() => {
     const callback = (obj: SerialReceiveArgs) => {
@@ -43,6 +43,8 @@ export const Console = () => {
         timestamp: new Date(),
         error,
       });
+      setResult(result);
+      setError(error);
     };
 
     return getIpcRenderer().on("serial_receive", callback);

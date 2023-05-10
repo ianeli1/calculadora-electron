@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 const messageContext = React.createContext<MessageContextState>(null!);
 
@@ -11,6 +11,10 @@ export interface MessageElement {
 
 interface MessageContextState {
   messages: MessageElement[];
+  result: number;
+  error: boolean;
+  setResult: (result: number) => void;
+  setError: (error: boolean) => void;
   addMessage: (message: MessageElement) => void;
 }
 
@@ -19,6 +23,9 @@ export const MessageProvider: React.FC<{
 }> = ({ children }) => {
   const [messages, setMessages] = React.useState<MessageElement[]>([]);
 
+  const [result, setResult] = useState<number | null>(null);
+  const [error, setError] = useState<boolean>(false);
+
   const addMessage = (message: MessageElement) => {
     setMessages((prev) => [...prev, message]);
   };
@@ -26,6 +33,18 @@ export const MessageProvider: React.FC<{
   const value = {
     messages,
     addMessage,
+    result,
+    setResult: (res: number) => {
+      console.log(`Updating result ctx to: ${res}`);
+      setResult(res);
+      if (!res) {
+        setError(false);
+      }
+    },
+    error,
+    setError: (error: boolean) => {
+      setError(error);
+    },
   };
 
   return (
@@ -34,4 +53,3 @@ export const MessageProvider: React.FC<{
 };
 
 export const useMessages = () => React.useContext(messageContext);
-

@@ -1,4 +1,5 @@
 import React from "react";
+import { useMessages } from "./messageContext";
 
 export interface DisplayProps {
   operation?: "+" | "-" | "*" | "/";
@@ -15,6 +16,12 @@ export const Display = ({
   operand1,
   operand2,
 }: DisplayProps) => {
+  const { result: ctxResult, error } = useMessages();
+
+  const result_f = ctxResult;
+
+  console.log(`result_f: ${result_f}`);
+
   return (
     <section className="flex flex-col items-end">
       <div className="text-xl">
@@ -33,11 +40,9 @@ export const Display = ({
         </span>
         {/* result */}
       </div>
-      <div className="text-white text-4xl mt-1">
+      <div className={`text-white text-4xl mt-1 ${error ? "bg-red-700" : ""}`}>
         <h2>
-          {typeof result === "number"
-            ? `=${Math.round(result).toLocaleString()}`
-            : " "}
+          {typeof result_f === "number" ? `=${result_f ?? "[error]"}` : " "}
         </h2>
       </div>
     </section>
